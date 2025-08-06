@@ -1,3 +1,4 @@
+
 from PyQt6.QtWidgets import *
 from PyQt6.QtCore import QTimer
 from PyQt6.QtGui import QIcon
@@ -22,7 +23,7 @@ def convert():
 
         amount = float(amount_text)
 
-        if direction == "Крипта > Валюта":
+        if direction == "Крипта > Фіатт":
             result = round(amount * price, 2)
             result_lbl.setText(f"{amount} {crypto_id.upper()} = {result} {currency.upper()}")
         else:
@@ -31,19 +32,34 @@ def convert():
     except Exception:
         result_lbl.setText("Помилка або некоректне число")
 
+#auth_token = 3c218e6662d4d3c84690f53a975ecac86a75d50b
+
+def news():
+    try:
+        url = "/api/developer/v2/posts/?auth_token=3c218e6662d4d3c84690f53a975ecac86a75d50b&kind=news"
+        responce = requests.get(url)
+        data = responce.json()
+        posts = data.get("results", [])
+        text = ""
+        for p in posts[:5]:
+            title = p.get("title", "Без заголовка")
+            text += f"{title}""\n"
 
 
-timer = QTimer()
-timer.setInterval(10000)
-timer.timeout.connect(convert)
-timer.start()
+
+    except:
+        label.setText("Не вдалося знайти новини")
+
+
+label = QLabel("Оновіти новини")
+label.setWordWrap(True)
 
 app = QApplication([])
 
 window = QWidget()
 window.resize(600, 400)
 
-layout = QVBoxLayout()
+main_line = QVBoxLayout()
 
 crypto_box = QComboBox()
 crypto_box.addItem(QIcon("btc.png"), "bitcoin")
@@ -56,7 +72,7 @@ currency_box.addItem(QIcon("eur.png"), "eur")
 currency_box.addItem(QIcon("uah.png"), "uah")
 
 direction_box = QComboBox()
-direction_box.addItems(["Крипта > Валюта", "Валюта > Крипта"])
+direction_box.addItems(["Крипта > Фіат", "Фіат > Крипта"])
 
 amount_input = QLineEdit()
 
@@ -65,16 +81,24 @@ convert_btn.clicked.connect(convert)
 
 result_lbl = QLabel("Результат:")
 
-layout.addWidget(QLabel("Криптовалюта:"))
-layout.addWidget(crypto_box)
-layout.addWidget(QLabel("Валюта:"))
-layout.addWidget(currency_box)
-layout.addWidget(QLabel("Напрямок:"))
-layout.addWidget(direction_box)
-layout.addWidget(amount_input)
-layout.addWidget(convert_btn)
-layout.addWidget(result_lbl)
+main_line.addWidget(QLabel("Криптовалюта:"))
+main_line.addWidget(crypto_box)
+main_line.addWidget(QLabel("Валюта:"))
+main_line.addWidget(currency_box)
+main_line.addWidget(QLabel("Напрямок:"))
+main_line.addWidget(direction_box)
+main_line.addWidget(amount_input)
+main_line.addWidget(convert_btn)
+main_line.addWidget(label)
+main_line.addWidget(result_lbl)
 
-window.setLayout(layout)
+
+timer = QTimer()
+timer.setInterval(10000)
+timer.timeout.connect(convert)
+timer.start()
+
+
+window.setLayout(main_line)
 window.show()
 app.exec()
