@@ -9,14 +9,12 @@ window.resize(600, 500)
 
 main_layout = QVBoxLayout(window)
 
-
 btn_news = QPushButton("Новини")
 btn_converter = QPushButton("Конвертер")
 nav_layout = QHBoxLayout()
 nav_layout.addWidget(btn_news)
 nav_layout.addWidget(btn_converter)
 main_layout.addLayout(nav_layout)
-
 
 news_widget = QWidget()
 news_layout = QVBoxLayout(news_widget)
@@ -42,7 +40,6 @@ def load_news():
 news_btn.clicked.connect(load_news)
 news_layout.addWidget(news_btn)
 news_layout.addWidget(news_label)
-
 
 converter_widget = QWidget()
 conv_layout = QVBoxLayout(converter_widget)
@@ -84,8 +81,9 @@ def convert():
         else:
             result = round(amount / price, 8)
             result_lbl.setText(f"{amount} {currency.upper()} = {result} {crypto_id.upper()}")
-    except:
+    except Exception as e:
         result_lbl.setText("Помилка або некоректне число")
+        print(str(e))
 
 convert_btn.clicked.connect(convert)
 
@@ -99,24 +97,19 @@ conv_layout.addWidget(amount_input)
 conv_layout.addWidget(convert_btn)
 conv_layout.addWidget(result_lbl)
 
-
 timer = QTimer()
 timer.setInterval(10000)
 timer.timeout.connect(convert)
 timer.start()
 
-
 main_layout.addWidget(news_widget)
 main_layout.addWidget(converter_widget)
-
 
 news_widget.show()
 converter_widget.hide()
 
-
 btn_news.clicked.connect(lambda: (news_widget.show(), converter_widget.hide()))
 btn_converter.clicked.connect(lambda: (converter_widget.show(), news_widget.hide()))
-
 
 window.show()
 app.exec()
