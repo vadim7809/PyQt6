@@ -1,65 +1,51 @@
-
 from PyQt6.QtWidgets import *
-from PyQt6.QtCore import QTimer
 from PyQt6.QtGui import QIcon
+from PyQt6.QtCore import QTimer
 import requests
 
+app = QApplication([])
+window = QWidget()
+window.resize(600, 500)
 
-def convert():
-    crypto_id = crypto_box.currentText().lower()
-    currency = currency_box.currentText().lower()
-    direction = direction_box.currentText()
-    amount_text = amount_input.text()
+main_layout = QVBoxLayout(window)
 
+
+btn_news = QPushButton("Новини")
+btn_converter = QPushButton("Конвертер")
+nav_layout = QHBoxLayout()
+nav_layout.addWidget(btn_news)
+nav_layout.addWidget(btn_converter)
+main_layout.addLayout(nav_layout)
+
+
+news_widget = QWidget()
+news_layout = QVBoxLayout(news_widget)
+
+news_label = QLabel("Тут з’являться новини")
+news_label.setWordWrap(True)
+news_btn = QPushButton("Оновити новини")
+
+def load_news():
     try:
-        url = "https://api.coingecko.com/api/v3/simple/price"
-        params = {"ids": crypto_id,
-                  "vs_currencies": currency}
-
-        response = requests.get(url, params=params)
+        url = "https://cryptopanic.com/api/v1/posts/?auth_token=3c218e6662d4d3c84690f53a975ecac86a75d50b&kind=news"
+        response = requests.get(url)
         data = response.json()
-
-        price = data[crypto_id][currency]
-
-        amount = float(amount_text)
-
-        if direction == "Крипта > Фіатт":
-            result = round(amount * price, 2)
-            result_lbl.setText(f"{amount} {crypto_id.upper()} = {result} {currency.upper()}")
-        else:
-            result = round(amount / price, 8)
-            result_lbl.setText(f"{amount} {currency.upper()} = {result} {crypto_id.upper()}")
-    except Exception:
-        result_lbl.setText("Помилка або некоректне число")
-
-#auth_token = 3c218e6662d4d3c84690f53a975ecac86a75d50b
-
-def news():
-    try:
-        url = "/api/developer/v2/posts/?auth_token=3c218e6662d4d3c84690f53a975ecac86a75d50b&kind=news"
-        responce = requests.get(url)
-        data = responce.json()
         posts = data.get("results", [])
         text = ""
         for p in posts[:5]:
             title = p.get("title", "Без заголовка")
-            text += f"{title}""\n"
-
-
-
+            text += f"• {title}\n\n"
+        news_label.setText(text)
     except:
-        label.setText("Не вдалося знайти новини")
+        news_label.setText("Не вдалося знайти новини")
+
+news_btn.clicked.connect(load_news)
+news_layout.addWidget(news_btn)
+news_layout.addWidget(news_label)
 
 
-label = QLabel("Оновіти новини")
-label.setWordWrap(True)
-
-app = QApplication([])
-
-window = QWidget()
-window.resize(600, 400)
-
-main_line = QVBoxLayout()
+converter_widget = QWidget()
+conv_layout = QVBoxLayout(converter_widget)
 
 crypto_box = QComboBox()
 crypto_box.addItem(QIcon("btc.png"), "bitcoin")
@@ -75,22 +61,43 @@ direction_box = QComboBox()
 direction_box.addItems(["Крипта > Фіат", "Фіат > Крипта"])
 
 amount_input = QLineEdit()
-
 convert_btn = QPushButton("Конвертувати")
-convert_btn.clicked.connect(convert)
-
 result_lbl = QLabel("Результат:")
 
-main_line.addWidget(QLabel("Криптовалюта:"))
-main_line.addWidget(crypto_box)
-main_line.addWidget(QLabel("Валюта:"))
-main_line.addWidget(currency_box)
-main_line.addWidget(QLabel("Напрямок:"))
-main_line.addWidget(direction_box)
-main_line.addWidget(amount_input)
-main_line.addWidget(convert_btn)
-main_line.addWidget(label)
-main_line.addWidget(result_lbl)
+def convert():
+    crypto_id = crypto_box.currentText().lower()
+    currency = currency_box.currentText().lower()
+    direction = direction_box.currentText()
+    amount_text = amount_input.text()
+
+    try:
+        url = "https://api.coingecko.com/api/v3/simple/price"
+        params = {"ids": crypto_id, "vs_currencies": currency}
+        response = requests.get(url, params=params)
+        data = response.json()
+        price = data[crypto_id][currency]
+        amount = float(amount_text)
+
+        if direction == "Крипта > Фіат":
+            result = round(amount * price, 2)
+            result_lbl.setText(f"{amount} {crypto_id.upper()} = {result} {currency.upper()}")
+        else:
+            result = round(amount / price, 8)
+            result_lbl.setText(f"{amount} {currency.upper()} = {result} {crypto_id.upper()}")
+    except:
+        result_lbl.setText("Помилка або некоректне число")
+
+convert_btn.clicked.connect(convert)
+
+conv_layout.addWidget(QLabel("Криптовалюта:"))
+conv_layout.addWidget(crypto_box)
+conv_layout.addWidget(QLabel("Валюта:"))
+conv_layout.addWidget(currency_box)
+conv_layout.addWidget(QLabel("Напрямок:"))
+conv_layout.addWidget(direction_box)
+conv_layout.addWidget(amount_input)
+conv_layout.addWidget(convert_btn)
+conv_layout.addWidget(result_lbl)
 
 
 timer = QTimer()
@@ -99,6 +106,17 @@ timer.timeout.connect(convert)
 timer.start()
 
 
-window.setLayout(main_line)
+main_layout.addWidget(news_widget)
+main_layout.addWidget(converter_widget)
+
+
+news_widget.show()
+converter_widget.hide()
+
+
+btn_news.clicked.connect(lambda: (news_widget.show(), converter_widget.hide()))
+btn_converter.clicked.connect(lambda: (converter_widget.show(), news_widget.hide()))
+
+
 window.show()
 app.exec()
