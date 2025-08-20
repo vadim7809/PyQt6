@@ -7,17 +7,17 @@ app = QApplication([])
 window = QWidget()
 window.resize(600, 500)
 
-main_layout = QVBoxLayout(window)
+main_line = QVBoxLayout(window)
 
 btn_news = QPushButton("Новини")
 btn_converter = QPushButton("Конвертер")
 nav_layout = QHBoxLayout()
 nav_layout.addWidget(btn_news)
 nav_layout.addWidget(btn_converter)
-main_layout.addLayout(nav_layout)
+main_line.addLayout(nav_layout)
 
 news_widget = QWidget()
-news_layout = QVBoxLayout(news_widget)
+news_line = QVBoxLayout(news_widget)
 
 news_label = QLabel("Тут з’являться новини")
 news_label.setWordWrap(True)
@@ -38,11 +38,11 @@ def load_news():
         news_label.setText("Не вдалося знайти новини")
 
 news_btn.clicked.connect(load_news)
-news_layout.addWidget(news_btn)
-news_layout.addWidget(news_label)
+news_line.addWidget(news_btn)
+news_line.addWidget(news_label)
 
 converter_widget = QWidget()
-conv_layout = QVBoxLayout(converter_widget)
+conv_line = QVBoxLayout(converter_widget)
 
 crypto_box = QComboBox()
 crypto_box.addItem(QIcon("btc.png"), "bitcoin")
@@ -87,29 +87,75 @@ def convert():
 
 convert_btn.clicked.connect(convert)
 
-conv_layout.addWidget(QLabel("Криптовалюта:"))
-conv_layout.addWidget(crypto_box)
-conv_layout.addWidget(QLabel("Валюта:"))
-conv_layout.addWidget(currency_box)
-conv_layout.addWidget(QLabel("Напрямок:"))
-conv_layout.addWidget(direction_box)
-conv_layout.addWidget(amount_input)
-conv_layout.addWidget(convert_btn)
-conv_layout.addWidget(result_lbl)
+conv_line.addWidget(QLabel("Криптовалюта:"))
+conv_line.addWidget(crypto_box)
+conv_line.addWidget(QLabel("Валюта:"))
+conv_line.addWidget(currency_box)
+conv_line.addWidget(QLabel("Напрямок:"))
+conv_line.addWidget(direction_box)
+conv_line.addWidget(amount_input)
+conv_line.addWidget(convert_btn)
+conv_line.addWidget(result_lbl)
 
 timer = QTimer()
 timer.setInterval(10000)
 timer.timeout.connect(convert)
 timer.start()
 
-main_layout.addWidget(news_widget)
-main_layout.addWidget(converter_widget)
+main_line.addWidget(news_widget)
+main_line.addWidget(converter_widget)
 
 news_widget.show()
 converter_widget.hide()
 
 btn_news.clicked.connect(lambda: (news_widget.show(), converter_widget.hide()))
 btn_converter.clicked.connect(lambda: (converter_widget.show(), news_widget.hide()))
+
+
+app.setStyleSheet("""
+    QWidget {
+        background-color: #1e1e2f;
+        color: #f0f0f0;
+        font-family: Arial;
+        font-size: 14px;
+    }
+
+    QPushButton {
+        background-color: #2ecc71;
+        color: white;
+        border-radius: 8px;
+        padding: 6px 12px;
+    }
+
+    QPushButton:hover {
+        background-color: #27ae60;
+    }
+
+    QPushButton:pressed {
+        background-color: #1e8449;
+    }
+
+    QLineEdit {
+        background-color: #2c3e50;
+        color: white;
+        border: 1px solid #27ae60;
+        border-radius: 6px;
+        padding: 4px;
+    }
+
+    QComboBox {
+        background-color: #2c3e50;
+        color: white;
+        border-radius: 6px;
+        padding: 4px;
+    }
+
+    QLabel {
+        font-size: 14px;
+        padding: 2px;
+    }
+""")
+
 
 window.show()
 app.exec()
